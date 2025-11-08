@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { useRecentThreads } from "@/lib/api";
+import { useThreads } from "@/lib/api";
 import { pathOfThread, titleOfThread } from "@/lib/thread/utils";
 
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 
 export function RecentThreads() {
   const pathname = usePathname();
-  const { data: threads = [] } = useRecentThreads();
+  const { data: threads = [] } = useThreads();
   if (threads.length === 0) {
     return null;
   }
