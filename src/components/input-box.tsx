@@ -1,3 +1,4 @@
+import type { ChatStatus } from "ai";
 import { MessageSquarePlus } from "lucide-react";
 import { useCallback, type ComponentProps } from "react";
 
@@ -20,21 +21,29 @@ export function InputBox({
   assistantId,
   isNew,
   autoFocus,
+  status = "ready",
   onSubmit,
+  onStop,
   ...props
 }: Omit<ComponentProps<typeof PromptInput>, "onSubmit"> & {
   assistantId?: string | null;
   isNew?: boolean;
+  status?: ChatStatus;
   onSubmit?: (message: PromptInputMessage) => void;
+  onStop?: () => void;
 }) {
   const handleSubmit = useCallback(
     async (message: PromptInputMessage) => {
+      if (status === "streaming") {
+        onStop?.();
+        return;
+      }
       if (!message.text) {
         return;
       }
       onSubmit?.(message);
     },
-    [onSubmit],
+    [onStop, onSubmit, status],
   );
   return (
     <PromptInput
@@ -76,7 +85,7 @@ export function InputBox({
           <PromptInputSubmit
             className="rounded-full"
             variant="outline"
-            status="ready"
+            status={status}
           />
         </div>
       </PromptInputFooter>

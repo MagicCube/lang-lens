@@ -35,7 +35,7 @@ export default function ThreadPage() {
       setThreadId(uuid());
     }
   }, [threadIdFromPath]);
-  const { messages, submit } = useStream<MessageThreadValues>({
+  const { messages, isLoading, submit, stop } = useStream<MessageThreadValues>({
     client: apiClient,
     assistantId: assistantId!,
     threadId: !isNew ? threadId : undefined,
@@ -102,6 +102,10 @@ export default function ThreadPage() {
     [assistantId, isNew, queryClient, router, submit, threadId],
   );
 
+  const handleStop = useCallback(() => {
+    void stop();
+  }, [stop]);
+
   return (
     <WorkspaceContainer>
       <WorkspaceHeader>{isNew ? `New` : threadIdFromPath}</WorkspaceHeader>
@@ -114,9 +118,11 @@ export default function ThreadPage() {
         <InputBox
           className={cn(isNew && "-translate-y-[40vh]")}
           assistantId={assistantId}
+          status={isLoading ? "streaming" : "ready"}
           isNew={isNew}
           autoFocus={isNew || searchParams.get("autoFocus") === "true"}
           onSubmit={handleSubmit}
+          onStop={handleStop}
         />
       </WorkspaceFooter>
     </WorkspaceContainer>
