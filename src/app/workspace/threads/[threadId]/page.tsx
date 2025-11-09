@@ -2,6 +2,7 @@
 
 import type { HumanMessage } from "@langchain/core/messages";
 import { useStream } from "@langchain/langgraph-sdk/react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   redirect,
   useParams,
@@ -25,6 +26,7 @@ import { type MessageThreadValues } from "@/lib/thread";
 import { cn } from "@/lib/utils";
 
 export default function ThreadPage() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
   const assistantId = searchParams.get("assistantId");
@@ -51,6 +53,34 @@ export default function ThreadPage() {
   const handleSubmit = useCallback(
     async (message: PromptInputMessage) => {
       if (isNew) {
+        queryClient.setQueryData(
+          [
+            "threads",
+            "search",
+            {
+              limit: 50,
+              sortBy: "updated_at",
+              sortOrder: "desc",
+            },
+          ],
+          (oldData) => {
+            return [
+              {
+                thread_id: threadId,
+                metadata: { assistant_id: assistantId, graph_id: assistantId },
+                values: {
+                  messages: [
+                    {
+                      type: "human",
+                      content: [{ type: "text", text: message.text }],
+                    },
+                  ],
+                },
+              },
+              ...(oldData as Array<unknown>),
+            ];
+          },
+        );
         router.replace(
           `/workspace/threads/${threadId}?assistantId=${assistantId}`,
         );
@@ -73,8 +103,9 @@ export default function ThreadPage() {
           threadId: isNew ? threadId! : undefined,
         },
       );
+      void queryClient.invalidateQueries({ queryKey: ["threads", "search"] });
     },
-    [assistantId, isNew, router, submit, threadId],
+    [assistantId, isNew, queryClient, router, submit, threadId],
   );
 
   return (

@@ -29,7 +29,7 @@ export function useAssistants(
   },
 ) {
   return useQuery({
-    queryKey: ["assistants"],
+    queryKey: ["assistants", "search", params],
     queryFn: async () => {
       const response = await apiClient.assistants.search(params);
       return response;
