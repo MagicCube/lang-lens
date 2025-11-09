@@ -55,7 +55,7 @@ export default function AssistantsPage() {
   return (
     <WorkspaceContainer>
       <WorkspaceHeader />
-      <WorkspaceContent className="py-4">
+      <WorkspaceContent className="pt-8">
         {assistants.length === 0 ? (
           <EmptyState
             icon={<BotOff className="size-6" />}
@@ -73,7 +73,7 @@ export default function AssistantsPage() {
             }
           />
         ) : (
-          <div className="grid w-full max-w-(--container-width-lg) grid-cols-3 gap-4">
+          <div className="grid w-full max-w-(--container-width-lg) grid-cols-3 gap-8">
             {assistants.map((assistant) => (
               <Link
                 key={assistant.assistant_id}
