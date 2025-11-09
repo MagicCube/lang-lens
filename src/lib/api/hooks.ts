@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { MessageThread, MessageThreadValues } from "../thread";
 
@@ -17,6 +17,26 @@ export function useThreads(
       const response =
         await apiClient.threads.search<MessageThreadValues>(params);
       return response as MessageThread[];
+    },
+  });
+}
+
+export function useDeleteThread() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ threadId }: { threadId: string }) => {
+      await apiClient.threads.delete(threadId);
+    },
+    onSuccess(_, { threadId }) {
+      queryClient.setQueriesData(
+        {
+          queryKey: ["threads", "search"],
+          exact: false,
+        },
+        (oldData: Array<MessageThread>) => {
+          return oldData.filter((t) => t.thread_id !== threadId);
+        },
+      );
     },
   });
 }
