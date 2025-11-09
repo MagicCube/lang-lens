@@ -210,6 +210,8 @@
 }
 
 :root {
+  --container-width-xs: calc(var(--spacing) * 72);
+  --container-width-sm: calc(var(--spacing) * 144);
   --container-width-md: calc(var(--spacing) * 192);
   --container-width-lg: calc(var(--spacing) * 256);
 

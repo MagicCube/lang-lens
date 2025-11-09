@@ -38,7 +38,10 @@ export function InputBox({
   return (
     <PromptInput
       className={cn(
-        "rounded-3xl drop-shadow-2xl backdrop-blur-xs *:data-[slot='input-group']:rounded-3xl",
+        "rounded-3xl drop-shadow-2xl backdrop-blur-xs transition-all duration-300 ease-out *:data-[slot='input-group']:rounded-3xl",
+        isNewThread
+          ? "max-w-(--container-width-sm)"
+          : "focus-within:bg-background/85 h-12 max-w-(--container-width-xs) overflow-hidden focus-within:h-fit focus-within:max-w-(--container-width-md)",
         className,
       )}
       globalDrop
@@ -61,11 +64,8 @@ export function InputBox({
           </PromptInputAttachments>
         </div>
         <PromptInputTextarea
-          className={cn(
-            "pl-4 transition-[width,height] duration-300",
-            !isNewThread ? "min-h-1!" : "",
-          )}
-          autoFocus
+          className={cn("pl-4", isNewThread ? "min-h-24!" : "min-h-1!")}
+          placeholder="How can I assist you today?"
         />
       </PromptInputBody>
       <PromptInputFooter className="flex">

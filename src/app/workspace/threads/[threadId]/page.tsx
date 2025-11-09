@@ -118,10 +118,7 @@ export default function ThreadPage() {
       </WorkspaceContent>
       <WorkspaceFooter>
         <InputBox
-          className={cn(
-            "max-w-(--container-width-md)",
-            isNew && "-translate-y-[40vh]",
-          )}
+          className={cn(isNew && "-translate-y-[40vh]")}
           assistantId={assistantId}
           isNewThread={isNew}
           onSubmit={handleSubmit}
