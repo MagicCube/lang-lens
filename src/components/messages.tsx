@@ -10,6 +10,7 @@ import {
   MessageContent as ConversationMessageContent,
   MessageResponse as ConversationMessageResponse,
 } from "./ai-elements/message";
+import { InnerShadow } from "./inner-shadow";
 import { ToolCallView } from "./tool-call-view";
 
 export function Messages({
@@ -23,7 +24,7 @@ export function Messages({
     <Conversation
       className={cn("flex h-full w-full justify-center", className)}
     >
-      <ConversationContent className="w-full max-w-(--container-width-md) place-self-center pt-20 pb-40">
+      <ConversationContent className="w-full max-w-(--container-width-md) place-self-center pt-12 pb-40">
         {messages.map(
           (message) =>
             shouldRender(message) && (
@@ -34,6 +35,7 @@ export function Messages({
               />
             ),
         )}
+        <InnerShadow />
       </ConversationContent>
     </Conversation>
   );
@@ -63,7 +65,7 @@ export function MessageItem({
 }) {
   return (
     <ConversationMessage from={message.type === "human" ? "user" : "assistant"}>
-      <ConversationMessageContent>
+      <ConversationMessageContent className="relative">
         {typeof message.content === "string" ? (
           <MessageContent>{message.content}</MessageContent>
         ) : (

@@ -71,7 +71,11 @@ export function InputBox({
       <PromptInputFooter className="flex">
         <div></div>
         <div className="flex items-center gap-2">
-          <PromptInputSubmit variant="outline" status="ready" />
+          <PromptInputSubmit
+            className="rounded-full"
+            variant="outline"
+            status="ready"
+          />
         </div>
       </PromptInputFooter>
     </PromptInput>
