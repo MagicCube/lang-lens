@@ -55,7 +55,7 @@ export default function AssistantsPage() {
   return (
     <WorkspaceContainer>
       <WorkspaceHeader />
-      <WorkspaceContent>
+      <WorkspaceContent className="py-4">
         {assistants.length === 0 ? (
           <EmptyState
             icon={<BotOff className="size-6" />}
