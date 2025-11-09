@@ -196,7 +196,7 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    line-height: 1.65rem;
+    line-height: 1.87rem;
   }
   body {
     @apply bg-background text-foreground;
@@ -215,5 +215,5 @@
   --container-width-md: calc(var(--spacing) * 192);
   --container-width-lg: calc(var(--spacing) * 256);
 
-  font-weight: 320;
+  font-weight: 300;
 }
