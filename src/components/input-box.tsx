@@ -38,7 +38,7 @@ export function InputBox({
   return (
     <PromptInput
       className={cn(
-        "bg-card/80 rounded-3xl drop-shadow-2xl backdrop-blur-xs *:data-[slot='input-group']:rounded-3xl",
+        "rounded-3xl drop-shadow-2xl backdrop-blur-xs *:data-[slot='input-group']:rounded-3xl",
         className,
       )}
       globalDrop
