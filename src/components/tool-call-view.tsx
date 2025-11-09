@@ -18,8 +18,12 @@ export function ToolCallView({
   toolCall: ToolCall;
   messages: Message[];
 }) {
-  const toolMessage = messages.find(
-    (msg) => msg.type === "tool" && msg.tool_call_id === toolCall.id,
+  const toolMessage = useMemo(
+    () =>
+      messages.find(
+        (msg) => msg.type === "tool" && msg.tool_call_id === toolCall.id,
+      ),
+    [messages, toolCall.id],
   );
   const state = useMemo<ToolHeaderProps["state"]>(() => {
     if (toolMessage) {
