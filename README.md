@@ -60,7 +60,7 @@ cd lang-lens
 
 2. Install dependencies:
 ```bash
-npm install
+pnpm install
 ```
 
 3. Configure environment variables (optional):
@@ -72,7 +72,7 @@ Edit `.env.local` if you need to customize settings.
 
 4. Start the development server:
 ```bash
-npm run dev
+pnpm dev
 ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
@@ -132,20 +132,6 @@ lang-lens/
 ```
 
 ## Development
-
-### Available Scripts
-
-```bash
-npm run dev          # Start development server with Turbopack
-npm run build        # Build for production
-npm start            # Start production server
-npm run preview      # Build and preview
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix linting issues
-npm run check        # Type check + lint
-npm run format:check # Check code formatting
-npm run format:write # Auto-format code
-```
 
 ### Code Quality
 
