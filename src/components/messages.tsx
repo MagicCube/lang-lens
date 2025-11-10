@@ -1,7 +1,9 @@
 import type { MessageContentComplex } from "@langchain/core/messages";
 import type { AIMessage, Message } from "@langchain/langgraph-sdk";
 import type { UseStream } from "@langchain/langgraph-sdk/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { BagTemplate } from "node_modules/@langchain/langgraph-sdk/dist/react/types";
+import { useMemo } from "react";
 
 import { rehypeSplitWordsIntoSpans } from "@/lib/rehype";
 import type { MessageThreadValues } from "@/lib/thread";
@@ -16,9 +18,12 @@ import {
   Message as ConversationMessage,
   MessageContent as ConversationMessageContent,
   MessageResponse as ConversationMessageResponse,
+  MessageToolbar,
 } from "./ai-elements/message";
 import { InnerShadow } from "./inner-shadow";
 import { ToolCallView } from "./tool-call-view";
+import { Button } from "./ui/button";
+import { ButtonGroup, ButtonGroupText } from "./ui/button-group";
 
 export function Messages({
   className,
@@ -31,13 +36,13 @@ export function Messages({
     <Conversation
       className={cn("flex h-full w-full justify-center", className)}
     >
-      <ConversationContent className="w-full max-w-(--container-width-md) place-self-center pt-12 pb-40">
+      <ConversationContent className="w-full max-w-(--container-width-md) place-self-center pt-4 pb-40">
         {thread.messages.map(
           (message) =>
             shouldRender(message) && (
               <MessageItem
                 key={message.id}
-                className={cn(message.type === "human" && "mb-8")}
+                className={cn(message.type === "human" && "my-6")}
                 message={message}
                 thread={thread}
               />
@@ -50,21 +55,6 @@ export function Messages({
   );
 }
 
-export function shouldRender(message: Message) {
-  if (message.type === "tool") {
-    return false;
-  }
-  return true;
-}
-
-export function hasToolCalls(message: Message): message is AIMessage {
-  return (
-    message.type === "ai" &&
-    !!message.tool_calls &&
-    message.tool_calls.length > 0
-  );
-}
-
 export function MessageItem({
   className,
   message,
@@ -74,44 +64,63 @@ export function MessageItem({
   message: Message;
   thread: UseStream<MessageThreadValues, BagTemplate>;
 }) {
+  const metadata = useMemo(
+    () => thread.getMessagesMetadata(message),
+    [message, thread],
+  );
+  const from = message.type === "human" ? "user" : "assistant";
+  const branch = metadata?.branch ?? "main";
+  const branches = metadata?.branchOptions ?? ["main"];
   return (
     <ConversationMessage
       className={cn(
+        "relative",
+        "group/conversation-message",
         message.type === "ai" &&
           "hover:bg-card/40 rounded-lg px-4 py-2 transition-colors ease-out",
-        message.type === "human" && "mb-8",
         className,
       )}
-      from={message.type === "human" ? "user" : "assistant"}
+      from={from}
     >
-      <ConversationMessageContent className="flex flex-col">
-        {typeof message.content === "string" ? (
-          <MessageContent>{message.content}</MessageContent>
-        ) : (
-          message.content.map((content, index) => (
-            <MessageContent key={index}>{content}</MessageContent>
-          ))
-        )}
-        {hasToolCalls(message) && message.tool_calls && (
-          <div className="flex flex-col gap-4 pb-2">
-            {message.tool_calls.map((tool_call) => (
-              <ToolCallView
-                key={tool_call.id}
-                toolCall={tool_call}
-                messages={thread.messages}
-              />
-            ))}
-          </div>
-        )}
-      </ConversationMessageContent>
+      <div className={cn("flex w-full flex-col gap-2 [&>div]:pb-0", className)}>
+        <ConversationMessageContent className="flex flex-col">
+          <MessageContentWithToolCalls message={message} thread={thread} />
+        </ConversationMessageContent>
+        <MessageToolbar
+          className={cn(
+            from === "user" && "justify-end",
+            from === "user" ? "-bottom-4" : "-bottom-10",
+            "absolute right-0 left-0 opacity-0 transition-opacity delay-500 duration-250 group-hover/conversation-message:opacity-100",
+          )}
+        >
+          <BranchSwitch value={branch} options={branches} thread={thread} />
+        </MessageToolbar>
+      </div>
     </ConversationMessage>
+  );
+}
+
+function MessageContentWithToolCalls({
+  message,
+  thread,
+}: {
+  message: Message;
+  thread: UseStream<MessageThreadValues, BagTemplate>;
+}) {
+  return (
+    <>
+      {extractContents(message).map((content, index) => (
+        <MessageContent key={index}>{content}</MessageContent>
+      ))}
+      <ToolCalls message={message} thread={thread} />
+    </>
   );
 }
 
 function MessageContent({
   children,
 }: {
-  children: string | MessageContentComplex | null | undefined;
+  children: MessageContentComplex | string | null | undefined;
 }) {
   if (!children) {
     return null;
@@ -143,5 +152,102 @@ function MessageContent({
     <ConversationMessageResponse rehypePlugins={[rehypeSplitWordsIntoSpans]}>
       {children as string}
     </ConversationMessageResponse>
+  );
+}
+
+function ToolCalls({
+  message,
+  thread,
+}: {
+  message: Message;
+  thread: UseStream<MessageThreadValues, BagTemplate>;
+}) {
+  return (
+    hasToolCalls(message) &&
+    message.tool_calls && (
+      <div className="flex flex-col gap-4 pb-2">
+        {message.tool_calls.map((tool_call) => (
+          <ToolCallView
+            key={tool_call.id}
+            toolCall={tool_call}
+            messages={thread.messages}
+          />
+        ))}
+      </div>
+    )
+  );
+}
+
+function BranchSwitch({
+  value,
+  options,
+  thread,
+}: {
+  value: string;
+  options: string[];
+  thread: UseStream<MessageThreadValues, BagTemplate>;
+}) {
+  const index = options.indexOf(value);
+  const totalBranches = options.length;
+  if (totalBranches <= 1) {
+    return null;
+  }
+  const handlePrevious = () => {
+    const previousIndex = (index - 1 + options.length) % options.length;
+    const previousBranch = options[previousIndex];
+    thread.setBranch(previousBranch!);
+  };
+  const handleNext = () => {
+    const nextIndex = (index + 1) % options.length;
+    const nextBranch = options[nextIndex];
+    thread.setBranch(nextBranch!);
+  };
+  return (
+    <ButtonGroup
+      className="[&>*:not(:first-child)]:rounded-l-md [&>*:not(:last-child)]:rounded-r-md"
+      orientation="horizontal"
+    >
+      <Button
+        size="icon-sm"
+        type="button"
+        variant="ghost"
+        onClick={handlePrevious}
+      >
+        <ChevronLeftIcon size={14} />
+      </Button>
+      <ButtonGroupText
+        className={cn(
+          "text-muted-foreground border-none bg-transparent px-2 shadow-none",
+        )}
+      >
+        {options.indexOf(value) + 1} of {totalBranches}
+      </ButtonGroupText>
+      <Button size="icon-sm" type="button" variant="ghost" onClick={handleNext}>
+        <ChevronRightIcon size={14} />
+      </Button>
+    </ButtonGroup>
+  );
+}
+
+function extractContents(message: Message) {
+  if (typeof message.content === "string") {
+    return [message.content];
+  } else {
+    return message.content;
+  }
+}
+
+function shouldRender(message: Message) {
+  if (message.type === "tool") {
+    return false;
+  }
+  return true;
+}
+
+function hasToolCalls(message: Message): message is AIMessage {
+  return (
+    message.type === "ai" &&
+    !!message.tool_calls &&
+    message.tool_calls.length > 0
   );
 }
