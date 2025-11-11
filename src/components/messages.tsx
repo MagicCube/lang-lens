@@ -7,10 +7,15 @@ import {
   Copy,
   Edit,
   RefreshCcw,
+  CheckIcon,
 } from "lucide-react";
 import type { BagTemplate } from "node_modules/@langchain/langgraph-sdk/dist/react/types";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
+import {
+  extractAIMessageContent,
+  extractTextFromMessageContent,
+} from "@/lib/message";
 import { rehypeSplitWordsIntoSpans } from "@/lib/rehype";
 import type { MessageThreadValues } from "@/lib/thread";
 import { cn } from "@/lib/utils";
@@ -89,6 +94,20 @@ export function MessageItem({
       return thread.messages[messageIndex + 1]?.type === "human";
     }
   }, [message, thread]);
+  const [copied, setCopied] = useState(false);
+  const handleCopy = useCallback(async () => {
+    let messageContent = "";
+    if (message.type === "human") {
+      messageContent = extractTextFromMessageContent(message.content);
+    } else if (message.type === "ai") {
+      messageContent = extractAIMessageContent(message, thread);
+    }
+    await navigator.clipboard.writeText(messageContent);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 1000);
+  }, [message, thread]);
   const from = message.type === "human" ? "user" : "assistant";
   const branch = metadata?.branch ?? "main";
   const branches = metadata?.branchOptions ?? ["main"];
@@ -117,8 +136,17 @@ export function MessageItem({
           >
             <BranchSwitch value={branch} options={branches} thread={thread} />
             <div className="flex gap-1">
-              <Button size="icon-sm" type="button" variant="ghost">
-                <Copy size={12} />
+              <Button
+                size="icon-sm"
+                type="button"
+                variant="ghost"
+                onClick={handleCopy}
+              >
+                {copied ? (
+                  <CheckIcon className="text-green-500" size={12} />
+                ) : (
+                  <Copy size={12} />
+                )}
               </Button>
               {from === "user" && (
                 <Button size="icon-sm" type="button" variant="ghost">
