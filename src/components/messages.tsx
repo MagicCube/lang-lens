@@ -112,7 +112,7 @@ export function MessageItem({
             className={cn(
               from === "user" && "justify-end",
               from === "user" ? "-bottom-6" : "-bottom-10",
-              "absolute right-0 left-0 opacity-0 transition-opacity delay-25 duration-300 group-hover/conversation-message:opacity-100",
+              "absolute right-0 left-0 opacity-0 transition-opacity delay-200 duration-300 group-hover/conversation-message:opacity-100",
             )}
           >
             <BranchSwitch value={branch} options={branches} thread={thread} />
