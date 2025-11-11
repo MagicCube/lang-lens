@@ -30,15 +30,17 @@ export function extractAIMessageContent(
   thread: UseStream<MessageThreadValues, BagTemplate>,
 ): string {
   const messageIndex = thread.values.messages.indexOf(message as BaseMessage);
-  // 往前找第一个 human 消息
-  const previousHumanMessage = thread.values.messages.find(
-    (msg, index) => index < messageIndex && msg.type === "human",
-  );
-  if (!previousHumanMessage) {
+  let previousHumanMessageIndex = -1;
+  for (let i = messageIndex - 1; i >= 0; i--) {
+    const msg = thread.values.messages[i]!;
+    if (msg.type === "human") {
+      previousHumanMessageIndex = i;
+      break;
+    }
+  }
+  if (previousHumanMessageIndex === -1) {
     return extractTextFromMessageContent(message.content);
   }
-  const previousHumanMessageIndex =
-    thread.values.messages.indexOf(previousHumanMessage);
   let content = "";
   for (let i = previousHumanMessageIndex + 1; i <= messageIndex; i++) {
     const msg = thread.values.messages[i]!;

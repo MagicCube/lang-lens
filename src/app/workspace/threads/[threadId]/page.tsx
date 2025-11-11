@@ -96,6 +96,8 @@ export default function ThreadPage() {
         },
         {
           threadId: isNew ? threadId! : undefined,
+          streamSubgraphs: true,
+          streamResumable: true,
         },
       );
       void queryClient.invalidateQueries({ queryKey: ["threads", "search"] });

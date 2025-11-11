@@ -134,7 +134,7 @@ export function WorkspaceFooter({
   return (
     <footer
       className={cn(
-        "absolute right-0 bottom-8 left-0 z-20 flex justify-center",
+        "absolute right-0 bottom-8 left-0 z-30 flex justify-center",
         className,
       )}
       {...props}

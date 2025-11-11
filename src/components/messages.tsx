@@ -1,4 +1,7 @@
-import type { MessageContentComplex } from "@langchain/core/messages";
+import type {
+  MessageContentComplex,
+  HumanMessage,
+} from "@langchain/core/messages";
 import type { AIMessage, Message } from "@langchain/langgraph-sdk";
 import type { UseStream } from "@langchain/langgraph-sdk/react";
 import {
@@ -8,6 +11,8 @@ import {
   Edit,
   RefreshCcw,
   CheckIcon,
+  X,
+  Send,
 } from "lucide-react";
 import type { BagTemplate } from "node_modules/@langchain/langgraph-sdk/dist/react/types";
 import { useCallback, useMemo, useState } from "react";
@@ -35,6 +40,7 @@ import { InnerShadow } from "./inner-shadow";
 import { ToolCallView } from "./tool-call-view";
 import { Button } from "./ui/button";
 import { ButtonGroup, ButtonGroupText } from "./ui/button-group";
+import { Textarea } from "./ui/textarea";
 
 export function Messages({
   className,
@@ -94,6 +100,45 @@ export function MessageItem({
       return thread.messages[messageIndex + 1]?.type === "human";
     }
   }, [message, thread]);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState<string>("");
+  const handleStartEditing = useCallback(
+    (messageId: string) => {
+      setEditingMessageId(messageId);
+      setEditingValue(extractTextFromMessageContent(message.content));
+    },
+    [setEditingMessageId, message.content],
+  );
+  const handleCancelEditing = useCallback(() => {
+    setEditingMessageId(null);
+  }, [setEditingMessageId]);
+  const handleSubmitEditing = useCallback(() => {
+    const parentCheckpoint = metadata?.firstSeenState?.parent_checkpoint;
+    if (!parentCheckpoint) {
+      return;
+    }
+    setEditingMessageId(null);
+    void thread.submit(
+      {
+        messages: [
+          {
+            type: "human",
+            content: [
+              {
+                type: "text",
+                text: editingValue,
+              },
+            ],
+          } as HumanMessage,
+        ],
+      },
+      {
+        checkpoint: parentCheckpoint,
+        streamSubgraphs: true,
+        streamResumable: true,
+      },
+    );
+  }, [editingValue, metadata, thread]);
   const [copied, setCopied] = useState(false);
   const handleCopy = useCallback(async () => {
     let messageContent = "";
@@ -124,14 +169,59 @@ export function MessageItem({
     >
       <div className={cn("flex w-full flex-col gap-2 [&>div]:pb-0", className)}>
         <ConversationMessageContent className="flex flex-col">
-          <MessageContentWithToolCalls message={message} thread={thread} />
+          {editingMessageId === message.id ? (
+            <form
+              className="flex flex-col gap-2"
+              onSubmit={handleSubmitEditing}
+            >
+              <Textarea
+                className="min-h-24 w-120 resize-none"
+                placeholder="Edit message"
+                autoFocus
+                value={editingValue}
+                onChange={(e) => setEditingValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Enter" &&
+                    !e.shiftKey &&
+                    !e.ctrlKey &&
+                    !e.metaKey
+                  ) {
+                    e.preventDefault();
+                    handleSubmitEditing();
+                  }
+                }}
+              />
+              <div className="self-end">
+                <Button
+                  className="hover:bg-white/10!"
+                  size="icon-sm"
+                  type="button"
+                  variant="ghost"
+                  onClick={handleCancelEditing}
+                >
+                  <X size={12} />
+                </Button>
+                <Button
+                  className="hover:bg-white/10!"
+                  size="icon-sm"
+                  type="submit"
+                  variant="ghost"
+                >
+                  <Send size={12} />
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <MessageContentWithToolCalls message={message} thread={thread} />
+          )}
         </ConversationMessageContent>
-        {showToolbar && (
+        {showToolbar && !editingMessageId && (
           <MessageToolbar
             className={cn(
               from === "user" && "justify-end",
-              from === "user" ? "-bottom-6" : "-bottom-10",
-              "absolute right-0 left-0 opacity-0 transition-opacity delay-200 duration-300 group-hover/conversation-message:opacity-100",
+              from === "user" ? "-bottom-5" : "-bottom-9",
+              "absolute right-0 left-0 z-20 opacity-0 transition-opacity delay-200 duration-300 group-hover/conversation-message:opacity-100",
             )}
           >
             <BranchSwitch value={branch} options={branches} thread={thread} />
@@ -149,7 +239,12 @@ export function MessageItem({
                 )}
               </Button>
               {from === "user" && (
-                <Button size="icon-sm" type="button" variant="ghost">
+                <Button
+                  size="icon-sm"
+                  type="button"
+                  variant="ghost"
+                  onClick={() => message.id && handleStartEditing(message.id)}
+                >
                   <Edit size={12} />
                 </Button>
               )}
