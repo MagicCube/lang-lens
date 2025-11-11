@@ -42,7 +42,7 @@ export function Messages({
             shouldRender(message) && (
               <MessageItem
                 key={message.id}
-                className={cn(message.type === "human" && "my-6")}
+                className={cn(message.type === "human" && "my-4")}
                 message={message}
                 thread={thread}
               />
@@ -110,7 +110,9 @@ function MessageContentWithToolCalls({
   return (
     <>
       {extractContents(message).map((content, index) => (
-        <MessageContent key={index}>{content}</MessageContent>
+        <MessageContent key={index} isLoading={thread.isLoading}>
+          {content}
+        </MessageContent>
       ))}
       <ToolCalls message={message} thread={thread} />
     </>
@@ -119,18 +121,22 @@ function MessageContentWithToolCalls({
 
 function MessageContent({
   children,
+  isLoading,
 }: {
   children: MessageContentComplex | string | null | undefined;
+  isLoading: boolean;
 }) {
+  const rehypePlugins = useMemo(
+    () => (isLoading ? [rehypeSplitWordsIntoSpans] : []),
+    [isLoading],
+  );
   if (!children) {
     return null;
   }
   if (typeof children === "object") {
     if (children.type === "text") {
       return (
-        <ConversationMessageResponse
-          rehypePlugins={[rehypeSplitWordsIntoSpans]}
-        >
+        <ConversationMessageResponse rehypePlugins={rehypePlugins}>
           {children.text}
         </ConversationMessageResponse>
       );
@@ -149,7 +155,7 @@ function MessageContent({
     }
   }
   return (
-    <ConversationMessageResponse rehypePlugins={[rehypeSplitWordsIntoSpans]}>
+    <ConversationMessageResponse rehypePlugins={rehypePlugins}>
       {children as string}
     </ConversationMessageResponse>
   );
