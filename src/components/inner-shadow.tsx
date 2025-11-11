@@ -1,6 +1,6 @@
 export function InnerShadow({
   position = "both",
-  height = "1rem",
+  height = "2rem",
 }: {
   position?: "top" | "bottom" | "both";
   height?: React.CSSProperties["height"];
