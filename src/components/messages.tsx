@@ -37,6 +37,7 @@ import {
   MessageToolbar,
 } from "./ai-elements/message";
 import { InnerShadow } from "./inner-shadow";
+import { LoadingAnimation } from "./loading";
 import { ToolCallView } from "./tool-call-view";
 import { Button } from "./ui/button";
 import { ButtonGroup, ButtonGroupText } from "./ui/button-group";
@@ -66,6 +67,7 @@ export function Messages({
             ),
         )}
         <InnerShadow />
+        {thread.isLoading && <LoadingAnimation className="m-4" />}
       </ConversationContent>
       <ConversationScrollButton className="-translate-y-16 backdrop-blur-xs" />
     </Conversation>
@@ -85,21 +87,6 @@ export function MessageItem({
     () => thread.getMessagesMetadata(message),
     [message, thread],
   );
-  const showToolbar = useMemo(() => {
-    if (message.type === "human") {
-      return true;
-    }
-    if (thread.isLoading) {
-      return false;
-    }
-    if (message.type === "ai") {
-      const messageIndex = thread.messages.indexOf(message);
-      if (messageIndex === thread.messages.length - 1) {
-        return true;
-      }
-      return thread.messages[messageIndex + 1]?.type === "human";
-    }
-  }, [message, thread]);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState<string>("");
   const handleStartEditing = useCallback(
@@ -139,6 +126,18 @@ export function MessageItem({
       },
     );
   }, [editingValue, metadata, thread]);
+  const handleRegenerate = useCallback(() => {
+    const parentCheckpoint = metadata?.firstSeenState?.parent_checkpoint;
+    if (!parentCheckpoint) {
+      return;
+    }
+    setEditingMessageId(null);
+    void thread.submit(undefined, {
+      checkpoint: parentCheckpoint,
+      streamSubgraphs: true,
+      streamResumable: true,
+    });
+  }, [metadata, thread]);
   const [copied, setCopied] = useState(false);
   const handleCopy = useCallback(async () => {
     let messageContent = "";
@@ -153,6 +152,24 @@ export function MessageItem({
       setCopied(false);
     }, 1000);
   }, [message, thread]);
+  const showToolbar = useMemo(() => {
+    if (editingMessageId) {
+      return false;
+    }
+    if (message.type === "human") {
+      return true;
+    }
+    if (thread.isLoading) {
+      return false;
+    }
+    if (message.type === "ai") {
+      const messageIndex = thread.messages.indexOf(message);
+      if (messageIndex === thread.messages.length - 1) {
+        return true;
+      }
+      return thread.messages[messageIndex + 1]?.type === "human";
+    }
+  }, [editingMessageId, message, thread.isLoading, thread.messages]);
   const from = message.type === "human" ? "user" : "assistant";
   const branch = metadata?.branch ?? "main";
   const branches = metadata?.branchOptions ?? ["main"];
@@ -216,7 +233,7 @@ export function MessageItem({
             <MessageContentWithToolCalls message={message} thread={thread} />
           )}
         </ConversationMessageContent>
-        {showToolbar && !editingMessageId && (
+        {showToolbar && (
           <MessageToolbar
             className={cn(
               from === "user" && "justify-end",
@@ -249,7 +266,12 @@ export function MessageItem({
                 </Button>
               )}
               {from === "assistant" && (
-                <Button size="icon-sm" type="button" variant="ghost">
+                <Button
+                  size="icon-sm"
+                  type="button"
+                  variant="ghost"
+                  onClick={handleRegenerate}
+                >
                   <RefreshCcw size={12} />
                 </Button>
               )}

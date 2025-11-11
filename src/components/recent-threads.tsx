@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import {
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuButton,
@@ -35,50 +36,53 @@ export function RecentThreads() {
     return null;
   }
   return (
-    <SidebarMenu>
-      {threads.map((thread) => {
-        const isActive = pathOfThread(thread, false) === pathname;
-        return (
-          <SidebarMenuItem
-            key={thread.thread_id}
-            className="group/side-menu-item"
-          >
-            <SidebarMenuButton isActive={isActive} asChild>
-              <div>
-                <Link
-                  className="text-muted-foreground block w-full whitespace-nowrap group-hover/side-menu-item:overflow-hidden"
-                  href={pathOfThread(thread)}
-                >
-                  {titleOfThread(thread)}
-                </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuAction
-                      showOnHover
-                      className="bg-background/80 hover:bg-background"
-                    >
-                      <MoreHorizontal />
-                      <span className="sr-only">More</span>
-                    </SidebarMenuAction>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-48 rounded-lg"
-                    side={"right"}
-                    align={"start"}
+    <>
+      <SidebarGroupLabel>Recents</SidebarGroupLabel>
+      <SidebarMenu>
+        {threads.map((thread) => {
+          const isActive = pathOfThread(thread, false) === pathname;
+          return (
+            <SidebarMenuItem
+              key={thread.thread_id}
+              className="group/side-menu-item"
+            >
+              <SidebarMenuButton isActive={isActive} asChild>
+                <div>
+                  <Link
+                    className="text-muted-foreground block w-full whitespace-nowrap group-hover/side-menu-item:overflow-hidden"
+                    href={pathOfThread(thread)}
                   >
-                    <DropdownMenuItem
-                      onSelect={() => handleDelete(thread.thread_id)}
+                    {titleOfThread(thread)}
+                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuAction
+                        showOnHover
+                        className="bg-background/80 hover:bg-background"
+                      >
+                        <MoreHorizontal />
+                        <span className="sr-only">More</span>
+                      </SidebarMenuAction>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-48 rounded-lg"
+                      side={"right"}
+                      align={"start"}
                     >
-                      <Trash2 className="text-muted-foreground" />
-                      <span>Delete</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        );
-      })}
-    </SidebarMenu>
+                      <DropdownMenuItem
+                        onSelect={() => handleDelete(thread.thread_id)}
+                      >
+                        <Trash2 className="text-muted-foreground" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
+      </SidebarMenu>
+    </>
   );
 }

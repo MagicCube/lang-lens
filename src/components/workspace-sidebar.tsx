@@ -105,7 +105,6 @@ function NavMain() {
 function NavRecents() {
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Recents</SidebarGroupLabel>
       <RecentThreads />
     </SidebarGroup>
   );
