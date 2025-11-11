@@ -61,7 +61,7 @@ export function InputBox({
     >
       {isNew && (
         <EmptyState
-          className="absolute -top-36"
+          className="absolute -top-28"
           description="Messages will appear here as the conversation progresses."
           icon={<MessageSquarePlus className="size-6" />}
           title={`Start a conversation with "${assistantId}"`}
@@ -74,7 +74,7 @@ export function InputBox({
           </PromptInputAttachments>
         </div>
         <PromptInputTextarea
-          className={cn("pl-4", isNew ? "min-h-24!" : "min-h-1!")}
+          className={cn("pl-4", isNew ? "" : "min-h-1!")}
           placeholder="How can I assist you today?"
           autoFocus={autoFocus}
         />
