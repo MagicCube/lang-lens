@@ -106,26 +106,28 @@ export function MessageItem({
       return;
     }
     setEditingMessageId(null);
-    void thread.submit(
-      {
-        messages: [
-          {
-            type: "human",
-            content: [
-              {
-                type: "text",
-                text: editingValue,
-              },
-            ],
-          } as HumanMessage,
-        ],
-      },
-      {
-        checkpoint: parentCheckpoint,
-        streamSubgraphs: true,
-        streamResumable: true,
-      },
-    );
+    // void thread.submit(
+    //   {
+    //     messages: [
+    //       {
+    //         type: "human",
+    //         content: [
+    //           {
+    //             type: "text",
+    //             text: editingValue,
+    //           },
+    //         ],
+    //       } as HumanMessage,
+    //     ],
+    //   },
+    //   {
+    //     checkpoint: parentCheckpoint,
+    //     streamMode: ["values"],
+    //     streamSubgraphs: true,
+    //     streamResumable: true,
+    //   },
+    // );
+    console.info(parentCheckpoint);
   }, [editingValue, metadata, thread]);
   const handleRegenerate = useCallback(() => {
     const previousHumanMessageIndex = findPreviousHumanMessageIndex(
@@ -167,11 +169,11 @@ export function MessageItem({
     if (editingMessageId) {
       return false;
     }
-    if (message.type === "human") {
-      return true;
-    }
     if (thread.isLoading) {
       return false;
+    }
+    if (message.type === "human") {
+      return true;
     }
     if (message.type === "ai") {
       const messageIndex = thread.messages.indexOf(message);
