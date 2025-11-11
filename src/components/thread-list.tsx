@@ -36,7 +36,7 @@ export function ThreadList({ className }: { className?: string }) {
             key={thread.thread_id}
             className="border-b hover:border-transparent"
           >
-            <div className="hover:bg-card/60 rounded-lg p-4">
+            <div className="hover:bg-card rounded-lg p-4">
               <Link className="flex flex-col gap-1" href={pathOfThread(thread)}>
                 <div className="text-lg">{titleOfThread(thread)}</div>
                 <div className="text-muted-foreground text-xs">
