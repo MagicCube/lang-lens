@@ -41,7 +41,7 @@ export function Todos({
         <QueueSectionTrigger>
           <QueueSectionLabel
             count={todos.length}
-            label={`Todo Item${todos.length > 1 ? "s" : ""}${completedTodos}`}
+            label={`todo item${todos.length > 1 ? "s" : ""}${completedTodos}`}
           />
         </QueueSectionTrigger>
         <QueueSectionContent>

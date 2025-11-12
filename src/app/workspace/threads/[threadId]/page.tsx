@@ -59,7 +59,10 @@ export default function ThreadPage() {
     const todoCallMessages = thread.messages.filter(
       (message) =>
         message.type === "ai" &&
-        message.tool_calls?.some((toolCall) => toolCall.name === "write_todos"),
+        message.tool_calls?.some(
+          (toolCall) =>
+            toolCall.name === "write_todos" || toolCall.name === "todo_write",
+        ),
     );
     if (todoCallMessages.length === 0) {
       return undefined;
@@ -68,7 +71,8 @@ export default function ThreadPage() {
       todoCallMessages.length - 1
     ] as AIMessage;
     const lastTodoToolCall = lastTodoCallMessage.tool_calls!.find(
-      (toolCall) => toolCall.name === "write_todos",
+      (toolCall) =>
+        toolCall.name === "write_todos" || toolCall.name === "todo_write",
     )!;
     if (lastTodoToolCall.args.todos) {
       setTodos(lastTodoToolCall.args.todos);
