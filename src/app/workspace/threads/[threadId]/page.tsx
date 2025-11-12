@@ -1,6 +1,9 @@
 "use client";
 
-import type { HumanMessage } from "@langchain/core/messages";
+import { todo } from "node:test";
+
+import type { AIMessage, HumanMessage } from "@langchain/core/messages";
+import type { ToolMessage } from "@langchain/langgraph-sdk";
 import { useStream } from "@langchain/langgraph-sdk/react";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -9,8 +12,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
+import type { QueueTodo } from "@/components/ai-elements/queue";
 import { InputBox } from "@/components/input-box";
 import { Messages } from "@/components/messages";
+import { Todos } from "@/components/todos";
 import {
   BreadcrumbItem,
   BreadcrumbLink,
@@ -48,6 +53,27 @@ export default function ThreadPage() {
     reconnectOnMount: true,
     fetchStateHistory: true,
   });
+
+  const [todos, setTodos] = useState<QueueTodo[]>([]);
+  useEffect(() => {
+    const todoCallMessages = thread.messages.filter(
+      (message) =>
+        message.type === "ai" &&
+        message.tool_calls?.some((toolCall) => toolCall.name === "write_todos"),
+    );
+    if (todoCallMessages.length === 0) {
+      return undefined;
+    }
+    const lastTodoCallMessage = todoCallMessages[
+      todoCallMessages.length - 1
+    ] as AIMessage;
+    const lastTodoToolCall = lastTodoCallMessage.tool_calls!.find(
+      (toolCall) => toolCall.name === "write_todos",
+    )!;
+    if (lastTodoToolCall.args.todos) {
+      setTodos(lastTodoToolCall.args.todos);
+    }
+  }, [thread.messages]);
 
   useAssistantMemory(assistantId, isNew);
 
@@ -129,7 +155,11 @@ export default function ThreadPage() {
         <BreadcrumbItem className="hidden md:block">{threadId}</BreadcrumbItem>
       </WorkspaceHeader>
       <WorkspaceContent>
-        <div className="flex h-full w-full">
+        <div className="flex h-full w-full flex-col">
+          <Todos
+            className="mt-2 w-full max-w-(--container-width-md) place-self-center"
+            todos={todos}
+          />
           <Messages thread={thread} />
         </div>
       </WorkspaceContent>

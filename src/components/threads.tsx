@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { InnerShadow } from "./inner-shadow";
 import { ScrollArea } from "./ui/scroll-area";
 
-export function ThreadList({
+export function Threads({
   className,
   threads,
 }: {

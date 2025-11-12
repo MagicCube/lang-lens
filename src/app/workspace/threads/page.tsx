@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 import { EmptyState } from "@/components/empty-state";
-import { ThreadList } from "@/components/thread-list";
+import { Threads } from "@/components/threads";
 import {
   WorkspaceContainer,
   WorkspaceContent,
@@ -42,7 +42,7 @@ export default function ThreadsPage() {
     <WorkspaceContainer>
       <WorkspaceHeader>{assistantId}</WorkspaceHeader>
       <WorkspaceContent>
-        <ThreadList
+        <Threads
           className="w-full max-w-(--container-width-lg)"
           threads={threads}
         />

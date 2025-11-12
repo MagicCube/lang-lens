@@ -39,6 +39,7 @@ import {
 } from "./ai-elements/message";
 import { InnerShadow } from "./inner-shadow";
 import { LoadingAnimation } from "./loading";
+import { Todos } from "./todos";
 import { ToolCallView } from "./tool-call-view";
 import { Button } from "./ui/button";
 import { ButtonGroup, ButtonGroupText } from "./ui/button-group";
@@ -53,7 +54,7 @@ export function Messages({
 }) {
   return (
     <Conversation
-      className={cn("flex h-full w-full justify-center", className)}
+      className={cn("flex h-full w-full flex-col justify-center", className)}
     >
       <ConversationContent className="w-full max-w-(--container-width-md) place-self-center pt-4 pb-48">
         {thread.messages.map(
